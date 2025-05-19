@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Administrative Boundaries Web Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Leaflet AJAX Plugin to load GeoJSON files -->
+  <script src="https://unpkg.com/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
+
+  <script>
+    // Initialize the map centered on Pakistan
+    var map = L.map('map').setView([30.3753, 69.3451], 6);
+
+    // Add Esri satellite basemap (Google Earth-style imagery)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/' +
+      'World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+    }).addTo(map);
+
+    // Function to add labeled GeoJSON layers
+    function addGeoJsonLayer(filePath, label, color) {
+      new L.GeoJSON.AJAX(filePath, {
+        style: {
+          color: color,
+          weight: 2,
+          fillOpacity: 0.2
+        },
+        onEachFeature: function (feature, layer) {
+          const name = feature.properties.name || 'N/A';
+          const area = feature.properties.area || 'N/A';
+          const population = feature.properties.population || 'N/A';
+
+          const popup = `
+            <b>${label}</b><br>
+            <b>Name:</b> ${name}<br>
+            <b>Area:</b> ${area}<br>
+            <b>Population:</b> ${population}
+          `;
+          layer.bindPopup(popup);
+        }
+      }).addTo(map);
+    }
+
+    // Load all administrative boundary layers
+    addGeoJsonLayer('data/districts.geojson', 'District Boundary', 'blue');
+    addGeoJsonLayer('data/tehsils.geojson', 'Tehsil Boundary', 'green');
+    addGeoJsonLayer('data/ucs.geojson', 'Union Council', 'orange');
+    addGeoJsonLayer('data/vcs.geojson', 'Village Council', 'red');
+  </script>
+</body>
+</html>
